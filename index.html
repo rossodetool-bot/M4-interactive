@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Scatter Plot</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #f7f6f2;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .container {
+      width: 100%;
+      max-width: 860px;
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: normal;
+      letter-spacing: 0.04em;
+      color: #00274C;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+    }
+    .subtitle {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 1.5rem;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.02em;
+    }
+    #plot {
+      width: 100%;
+      height: 560px;
+      border: 1px solid #ddd;
+      background: #fff;
+    }
+    .hint {
+      font-size: 0.72rem;
+      color: #aaa;
+      text-align: center;
+      margin-top: 0.75rem;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="plot" role="img" aria-label="3D scatter plot showing three clusters across professional guidance, value for money, and time flexibility axes"></div>
+    <p class="hint">Click and drag to rotate &nbsp;·&nbsp; Scroll to zoom &nbsp;·&nbsp; Double-click to reset view</p>
+  </div>
+
+  <script>
+    const seed = (s) => {
+      let x = s;
+      return () => {
+        x = (x * 1664525 + 1013904223) & 0xffffffff;
+        return (x >>> 0) / 0xffffffff;
+      };
+    };
+    const rng = seed(42);
+    const jitter = (base, amt) => base + (rng() - 0.5) * amt;
+
+    const clusters = [
+      { label: 'Yes / $50 / No',  x: 1, y: 0, z: 0, n: 5 },
+      { label: 'No / $100 / No',  x: 0, y: 1, z: 0, n: 5 },
+      { label: 'No / $50 / Yes',  x: 0, y: 0, z: 1, n: 5 },
+    ];
+
+    const j = 0.18;
+    const traces = clusters.map(c => {
+      const xs = [], ys = [], zs = [], labels = [];
+      for (let i = 0; i < c.n; i++) {
+        xs.push(jitter(c.x, j));
+        ys.push(jitter(c.y, j));
+        zs.push(jitter(c.z, j));
+        labels.push(c.label);
+      }
+      return {
+        type: 'scatter3d',
+        mode: 'markers',
+        name: c.label,
+        x: xs, y: ys, z: zs,
+        text: labels,
+        hovertemplate: '%{text}<extra></extra>',
+        marker: {
+          color: '#00274C',
+          size: 8,
+          opacity: 0.88,
+          line: { color: 'rgba(255,255,255,0.5)', width: 1 }
+        }
+      };
+    });
+
+    const layout = {
+      paper_bgcolor: '#ffffff',
+      plot_bgcolor: '#ffffff',
+      margin: { l: 0, r: 0, t: 20, b: 0 },
+      showlegend: false,
+      scene: {
+        bgcolor: '#ffffff',
+        xaxis: {
+          title: { text: 'Professional Guidance', font: { size: 16, family: 'Courier New, monospace' } },
+          tickvals: [0, 1],
+          ticktext: ['No', 'Yes'],
+          range: [-0.5, 1.5],
+          gridcolor: 'rgba(0,0,0,0.08)',
+          zerolinecolor: 'rgba(0,0,0,0.15)',
+        },
+        yaxis: {
+          title: { text: 'Value for Money', font: { size: 16, family: 'Courier New, monospace' } },
+          tickvals: [0, 1],
+          ticktext: ['$50', '$100'],
+          range: [-0.5, 1.5],
+          gridcolor: 'rgba(0,0,0,0.08)',
+          zerolinecolor: 'rgba(0,0,0,0.15)',
+        },
+        zaxis: {
+          title: { text: 'Time Flexibility', font: { size: 16, family: 'Courier New, monospace' } },
+          tickvals: [0, 1],
+          ticktext: ['No', 'Yes'],
+          range: [-0.5, 1.5],
+          gridcolor: 'rgba(0,0,0,0.08)',
+          zerolinecolor: 'rgba(0,0,0,0.15)',
+        },
+        camera: { eye: { x: 1.6, y: 1.6, z: 1.2 } }
+      }
+    };
+
+    Plotly.newPlot('plot', traces, layout, {
+      responsive: true,
+      displayModeBar: true,
+      modeBarButtonsToRemove: ['toImage']
+    });
+  </script>
+</body>
+</html>
